@@ -1,12 +1,53 @@
 import { useState } from "react";
-import { callNumber, formatBytes, isRead, pct, type Book } from "../types";
-import { IconBookOpen, IconPencil, IconStar, IconTrash } from "./Icons";
+import { callNumber, formatBytes, isRead, pct, syncState, type Book } from "../types";
+import {
+  IconBookOpen,
+  IconCloud,
+  IconCloudCheck,
+  IconCloudOff,
+  IconPencil,
+  IconSpinner,
+  IconStar,
+  IconTrash,
+} from "./Icons";
 
 export interface BookActions {
   onOpen: (b: Book) => void;
   onToggleFav: (b: Book) => void;
   onEdit: (b: Book) => void;
   onAskDelete: (b: Book) => void;
+  onSync: (b: Book) => void;
+}
+
+function SyncBadge({ book }: { book: Book }) {
+  const s = syncState(book);
+  if (s === "local") return null;
+  const cls =
+    s === "sincronizado"
+      ? "border-moss/50 bg-night/80 text-moss"
+      : s === "enviando"
+        ? "border-brass/50 bg-night/80 text-brass"
+        : "border-ember/50 bg-night/80 text-ember";
+  const label =
+    s === "sincronizado"
+      ? `Sincronizado com o WeLib${book.sync?.remoteId ? ` · ${book.sync.remoteId}` : ""}`
+      : s === "enviando"
+        ? "Enviando ao WeLib…"
+        : `Falha ao enviar ao WeLib${book.sync?.error ? ` — ${book.sync.error}` : ""}`;
+  return (
+    <span
+      title={label}
+      className={`absolute left-2 top-2 grid h-6 w-6 place-items-center rounded-full ring-1 ${cls}`}
+    >
+      {s === "sincronizado" ? (
+        <IconCloudCheck size={13} />
+      ) : s === "enviando" ? (
+        <IconSpinner size={12} />
+      ) : (
+        <IconCloudOff size={13} />
+      )}
+    </span>
+  );
 }
 
 function Cover({ book, className = "" }: { book: Book; className?: string }) {
@@ -37,8 +78,10 @@ function ActionButtons({
   onToggleFav,
   onEdit,
   onAskDelete,
+  onSync,
   subtle,
 }: BookActions & { book: Book; subtle?: boolean }) {
+  const s = syncState(book);
   return (
     <div
       className={`flex items-center gap-1 ${
@@ -72,6 +115,29 @@ function ActionButtons({
         <IconPencil size={13} />
       </button>
       <button
+        title={
+          s === "sincronizado"
+            ? "Sincronizado com o WeLib — enviar novamente"
+            : s === "enviando"
+              ? "Enviando ao WeLib…"
+              : "Enviar ao WeLib"
+        }
+        disabled={s === "enviando"}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSync(book);
+        }}
+        className={`grid h-7 w-7 place-items-center rounded-md border bg-night/70 transition-all disabled:cursor-wait ${
+          s === "sincronizado"
+            ? "border-moss/40 text-moss hover:border-moss/70"
+            : s === "erro"
+              ? "border-ember/40 text-ember hover:border-ember/70"
+              : "border-line text-paper2 hover:border-brass/60 hover:text-brass2"
+        }`}
+      >
+        {s === "enviando" ? <IconSpinner size={13} /> : <IconCloud size={13} />}
+      </button>
+      <button
         title="Remover da estante"
         onClick={(e) => {
           e.stopPropagation();
@@ -100,6 +166,7 @@ export function BookCard({ book, index, ...actions }: { book: Book; index: numbe
           {/* brilho da lombada */}
           <span className="pointer-events-none absolute inset-y-0 left-0 w-[9%] bg-gradient-to-r from-black/35 to-transparent" />
           <span className="pointer-events-none absolute inset-y-0 left-[9%] w-px bg-white/10" />
+          <SyncBadge book={book} />
           {book.favorite && (
             <span className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-night/80 text-brass ring-1 ring-brass/40">
               <IconStar size={12} filled />

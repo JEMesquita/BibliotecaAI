@@ -317,11 +317,12 @@
 
   <header class="masthead">
     <div>
-      <p class="kicker mono">Biblioteca virtual <b>·</b> PDF <b>·</b> Open Library API</p>
+      <p class="kicker mono">Biblioteca virtual <b>·</b> PDF <b>·</b> API WeLib</p>
       <h1>Estante<span class="amp">.</span></h1>
       <p class="lede">
-        Envie PDFs, receba capas e fichas catalográficas do <strong style="color:var(--brass2)">Open Library</strong>
-        e leia direto no navegador — com progresso salvo página a página e todo o acervo guardado no seu dispositivo.
+        Envie PDFs, receba capas e fichas catalográficas da <strong style="color:var(--brass2)">API WeLib</strong>
+        e leia direto no navegador — com progresso salvo página a página, sincronização com a biblioteca e todo o
+        acervo guardado no seu dispositivo.
       </p>
     </div>
     <div class="stamp">Mockup<small>uso interno · 2026</small></div>
@@ -329,7 +330,7 @@
 
   <div class="specrow reveal">
     <div><p class="k">Plataforma</p><p class="v">Web app <em>(SPA)</em></p></div>
-    <div><p class="k">Integração</p><p class="v">Open Library <em>API</em></p></div>
+    <div><p class="k">Integração</p><p class="v">WeLib <em>API</em></p></div>
     <div><p class="k">Leitor</p><p class="v">pdf.js <em>canvas</em></p></div>
     <div><p class="k">Armazenamento</p><p class="v">IndexedDB <em>local</em></p></div>
     <div><p class="k">Cadastro</p><p class="v">Zero <em>login</em></p></div>
@@ -346,7 +347,7 @@
           no estilo Dewey. A ficha do acervo resume o essencial e os filtros acompanham o ritmo da leitura.
         </p>
         <div class="points">
-          <span>capas via Open Library</span>
+          <span>catálogo via WeLib</span>
           <span>progresso salvo por página</span>
           <span>drag &amp; drop de PDFs</span>
           <span>vistas estante / lista</span>
@@ -397,7 +398,7 @@
               <div class="inner"><div class="bt">Dom Casmurro</div><div class="ba">Machado de Assis</div></div>
               <div class="star">★</div>
               <div class="prog"><i style="width:62%"></i></div>
-              <div class="ol">OPEN LIBRARY</div>
+              <div class="ol">WELIB API</div>
             </div>
             <div class="wood"></div>
             <div class="cap"><div class="t">Dom Casmurro</div><div class="a">Machado de Assis</div><div class="cn">MAC 412 · 214 p. · 62%</div></div>
@@ -513,10 +514,11 @@
       <div class="sec-head" style="grid-template-columns:auto 1fr;">
         <div class="sec-num" style="font-size:48px;">03</div>
         <div>
-          <h2 style="font-size:26px;">Catalogação Open Library</h2>
+          <h2 style="font-size:26px;">Catalogação WeLib</h2>
           <p style="font-size:13px;">
-            Ao enviar um PDF, a estante consulta o Open Library pelo título do arquivo,
-            oferece capas e metadados reais e deixa você escolher a correspondência certa.
+            Ao enviar um PDF, a estante consulta a API WeLib pelo título do arquivo,
+            oferece capas e metadados reais e deixa você escolher a correspondência certa —
+            e depois sincroniza o volume (PDF + ficha) com a biblioteca.
           </p>
         </div>
       </div>
@@ -550,11 +552,11 @@
             </div>
             <div>
               <div class="api-chip">
-                <span class="mth">GET</span> openlibrary.org/search.json<br/>
-                ?title=<em>dom casmurro</em>&amp;fields=cover_i,author_name → <span class="mth">200</span> · 5 resultados
+                <span class="mth">GET</span> api.welib/search<br/>
+                ?q=<em>dom casmurro</em>&amp;author= → <span class="mth">200</span> · 5 resultados
               </div>
               <div class="res-head">
-                <span class="t">Correspondências no Open Library</span>
+                <span class="t">Correspondências no WeLib</span>
                 <span class="n">3 de 5</span>
               </div>
               <div class="match sel">
@@ -624,10 +626,10 @@
         </div>
       </div>
       <div class="cell">
-        <p class="ck">Integração · Open Library</p>
+        <p class="ck">Integração · API WeLib</p>
         <div class="endpoints">
-          <code><b>GET</b> openlibrary.org/search.json<br/>?title=<em>{nome do arquivo}</em>&amp;fields=cover_i,author_name…</code>
-          <code><b>IMG</b> covers.openlibrary.org/b/id/<em>{cover_i}</em>-L.jpg</code>
+          <code><b>GET</b> {welib}/search<br/>?q=<em>{nome do arquivo}</em>&amp;author=<em>{autor}</em></code>
+          <code><b>POST</b> {welib}/items <em>(multipart: PDF + ficha)</em></code>
           <code><b>FALLBACK</b> capa gerada em canvas · <em>offline-first</em></code>
         </div>
       </div>

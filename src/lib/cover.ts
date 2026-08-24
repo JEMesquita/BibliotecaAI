@@ -1,4 +1,4 @@
-/** Capas geradas localmente (canvas) para livros sem capa no Open Library. */
+/** Capas geradas localmente (canvas) para livros sem capa no catálogo WeLib. */
 
 const CLOTH: Array<[string, string, string]> = [
   ["#2b4a3c", "#131f19", "#edc36b"],
