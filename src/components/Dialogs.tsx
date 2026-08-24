@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { Book, Toast } from "../types";
-import { IconAlert, IconCheck, IconInfo, IconX } from "./Icons";
+import { testWeLib, type WeLibConfig, type WeLibResult } from "../lib/welib";
+import { IconAlert, IconCheck, IconInfo, IconServer, IconSpinner, IconX } from "./Icons";
 
 export function ModalShell({
   onClose,
@@ -213,5 +214,184 @@ export function Toasts({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id:
         </div>
       ))}
     </div>
+  );
+}
+
+export function WeLibSettingsModal({
+  config,
+  onSave,
+  onClose,
+}: {
+  config: WeLibConfig;
+  onSave: (cfg: WeLibConfig) => void;
+  onClose: () => void;
+}) {
+  const [baseUrl, setBaseUrl] = useState(config.baseUrl);
+  const [apiKey, setApiKey] = useState(config.apiKey);
+  const [demo, setDemo] = useState(config.demo);
+  const [showKey, setShowKey] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [result, setResult] = useState<WeLibResult | null>(null);
+
+  const inputCls =
+    "w-full rounded-md border border-line bg-night px-3 py-2 text-sm text-paper outline-none transition-colors placeholder:text-muted/40 focus:border-brass disabled:opacity-40";
+
+  async function runTest() {
+    setTesting(true);
+    setResult(null);
+    try {
+      setResult(await testWeLib({ baseUrl, apiKey, demo }));
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  return (
+    <ModalShell onClose={onClose} wide>
+      <div className="flex items-center justify-between border-b border-line px-6 py-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-brass">Integração WeLib</p>
+          <h3 className="font-display text-lg font-bold text-paper">Configurar a API WeLib</h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="grid h-8 w-8 place-items-center rounded-md border border-line text-paper2 transition-colors hover:border-ember/50 hover:text-ember"
+          aria-label="Fechar configurações"
+        >
+          <IconX size={14} />
+        </button>
+      </div>
+
+      <div className="space-y-5 p-6">
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          <button
+            onClick={() => {
+              setDemo(true);
+              setResult(null);
+            }}
+            className={`rounded-md border p-3.5 text-left transition-all ${
+              demo
+                ? "border-brass bg-brass/10 shadow-[0_0_0_1px_rgba(217,164,65,0.4)]"
+                : "border-line bg-night hover:border-line2"
+            }`}
+          >
+            <p className="flex items-center gap-2 text-sm font-bold text-paper">
+              <IconServer size={15} className={demo ? "text-brass" : "text-muted"} />
+              Servidor de demonstração
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted">
+              Simula a API WeLib neste navegador, com catálogo de clássicos e latência real. Ideal para experimentar
+              sem credenciais.
+            </p>
+          </button>
+          <button
+            onClick={() => {
+              setDemo(false);
+              setResult(null);
+            }}
+            className={`rounded-md border p-3.5 text-left transition-all ${
+              !demo
+                ? "border-brass bg-brass/10 shadow-[0_0_0_1px_rgba(217,164,65,0.4)]"
+                : "border-line bg-night hover:border-line2"
+            }`}
+          >
+            <p className="flex items-center gap-2 text-sm font-bold text-paper">
+              <IconServer size={15} className={!demo ? "text-brass" : "text-muted"} />
+              Servidor WeLib próprio
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted">
+              Conecta a estante à API WeLib da sua instituição — informe a URL base e, se houver, a chave de API.
+            </p>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_200px]">
+          <div>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-muted">
+              URL base da API
+            </label>
+            <input
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              disabled={demo}
+              placeholder="https://biblioteca.sua-escola.edu.br/api"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-muted">
+              Chave de API
+            </label>
+            <div className="relative">
+              <input
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                disabled={demo}
+                type={showKey ? "text" : "password"}
+                placeholder="opcional"
+                className={`${inputCls} pr-16`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey((v) => !v)}
+                disabled={demo}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-line px-1.5 py-0.5 font-mono text-[10px] text-muted transition-colors hover:text-paper disabled:opacity-40"
+              >
+                {showKey ? "ocultar" : "ver"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-md border border-dashed border-line bg-night/60 px-4 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Contrato REST utilizado</p>
+          <div className="mt-2 grid gap-1 font-mono text-[11px] text-paper2 sm:grid-cols-2">
+            <p><span className="text-moss">GET</span> /status <span className="text-muted">— teste de conexão</span></p>
+            <p><span className="text-moss">GET</span> /search?q=&amp;author= <span className="text-muted">— edições</span></p>
+            <p><span className="text-brass2">POST</span> /items <span className="text-muted">— PDF + ficha</span></p>
+            <p><span className="text-ember">DELETE</span> /items/:id <span className="text-muted">— remover</span></p>
+          </div>
+        </div>
+
+        {result && (
+          <div
+            className={`flex items-start gap-2 rounded-md border px-3.5 py-2.5 text-xs leading-relaxed ${
+              result.ok ? "border-moss/40 bg-moss/10 text-moss" : "border-ember/40 bg-ember/10 text-ember"
+            }`}
+          >
+            {result.ok ? <IconCheck size={14} className="mt-0.5 shrink-0" /> : <IconAlert size={14} className="mt-0.5 shrink-0" />}
+            <span>
+              {result.message}
+              {result.status ? <span className="opacity-70"> (HTTP {result.status})</span> : null}
+            </span>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <button
+            onClick={() => void runTest()}
+            disabled={testing}
+            className="inline-flex items-center gap-2 rounded-md border border-line bg-night px-4 py-2 text-sm font-semibold text-paper2 transition-colors enabled:hover:border-brass/50 enabled:hover:text-brass2 disabled:opacity-50"
+          >
+            {testing ? <IconSpinner size={14} /> : <IconServer size={14} />}
+            Testar conexão
+          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="rounded-md border border-line bg-night px-4 py-2 text-sm text-paper2 transition-colors hover:border-line2 hover:text-paper"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => onSave({ baseUrl: baseUrl.trim(), apiKey: apiKey.trim(), demo })}
+              className="rounded-md bg-brass px-5 py-2 text-sm font-bold text-night transition-all hover:bg-brass2 active:scale-95"
+            >
+              Salvar conexão
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalShell>
   );
 }

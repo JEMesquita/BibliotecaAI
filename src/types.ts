@@ -6,7 +6,7 @@ export interface Book {
   year?: string;
   publisher?: string;
   subjects: string[];
-  /** Capa remota vinda do Open Library (covers.openlibrary.org). */
+  /** Capa remota vinda do catálogo WeLib (quando o registro traz uma). */
   coverUrl: string | null;
   /** Capa gerada localmente (fallback offline / sem correspondência). */
   coverData: string | null;
@@ -18,19 +18,35 @@ export interface Book {
   /** Última página lida (0 = ainda não aberto). */
   progressPage: number;
   favorite: boolean;
+  /** Sincronização com a API WeLib (opcional — volumes antigos não têm). */
+  sync?: SyncInfo;
 }
 
-/** Correspondência retornada pela busca no Open Library. */
-export interface OLMatch {
-  key: string;
+/** Correspondência retornada pela busca no catálogo WeLib. */
+export interface WeLibMatch {
+  id: string;
   title: string;
   authors: string[];
   year?: number;
-  coverId?: number;
-  subjects: string[];
   publisher?: string;
+  subjects: string[];
   pages?: number;
+  isbn?: string;
+  coverUrl?: string;
 }
+
+/** Estado de sincronização de um volume com a API WeLib. */
+export type SyncState = "local" | "enviando" | "sincronizado" | "erro";
+
+export interface SyncInfo {
+  state: SyncState;
+  /** Identificador do volume no servidor WeLib. */
+  remoteId?: string;
+  syncedAt?: number;
+  error?: string;
+}
+
+export const syncState = (b: Book): SyncState => b.sync?.state ?? "local";
 
 export type ToastKind = "ok" | "info" | "err";
 

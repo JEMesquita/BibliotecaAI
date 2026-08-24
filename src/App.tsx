@@ -1,12 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { deleteBook, getAllBooks, putBook } from "./lib/db";
+import { deleteBook, getAllBooks, getFile, putBook } from "./lib/db";
 import { domCasmurroSample } from "./lib/samplePdf";
+import {
+  isWeLibReady,
+  loadWeLibConfig,
+  removeFromWeLib,
+  saveWeLibConfig,
+  testWeLib,
+  uploadToWeLib,
+  type WeLibConfig,
+  type WeLibResult,
+} from "./lib/welib";
 import {
   formatBytes,
   formatDate,
   isRead,
   isReading,
   pct,
+  syncState,
   type Book,
   type Toast,
   type ToastKind,
@@ -14,7 +25,8 @@ import {
 import { BookCard, BookRow } from "./components/BookCard";
 import ReaderModal from "./components/ReaderModal";
 import CatalogModal from "./components/CatalogModal";
-import { ConfirmDialog, EditBookModal, Toasts } from "./components/Dialogs";
+import WeLibPanel from "./components/WeLibPanel";
+import { ConfirmDialog, EditBookModal, Toasts, WeLibSettingsModal } from "./components/Dialogs";
 import {
   IconBookOpen,
   IconGrid,
@@ -117,14 +129,14 @@ function EmptyState({ onUpload, onSample }: { onUpload: () => void; onSample: ()
           Sua estante começa com um PDF.
         </h2>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-[#57503a]">
-          Arraste arquivos <strong>.pdf</strong> para qualquer lugar desta página. A estante consulta o{" "}
-          <strong>Open Library</strong> em busca de capa, autor e ano — você confirma a edição e o volume entra
-          catalogado, pronto para ler no navegador.
+          Arraste arquivos <strong>.pdf</strong> para qualquer lugar desta página. A estante lê o documento e
+          consulta a <strong>API WeLib</strong> em busca de capa, autor e ano — você confirma a edição e o volume
+          entra catalogado, pronto para ler no navegador.
         </p>
         <ol className="mt-6 space-y-2.5">
           {[
             "Envie um ou vários PDFs de uma vez",
-            "Confirme a edição encontrada no Open Library",
+            "Confirme a edição encontrada no catálogo WeLib",
             "Leia aqui mesmo, com progresso salvo automaticamente",
           ].map((step, i) => (
             <li key={step} className="flex items-center gap-3 font-mono text-[11px] text-[#6b5f3e]">
@@ -159,7 +171,7 @@ function EmptyState({ onUpload, onSample }: { onUpload: () => void; onSample: ()
           <IconLamp size={18} className="mt-0.5 shrink-0 text-brass" />
           <p className="text-xs leading-relaxed text-muted">
             Tudo fica <span className="text-paper2">salvo neste navegador</span> — arquivos, capas e progresso de
-            leitura. Nenhum byte sai do seu computador, exceto a consulta de metadados ao Open Library.
+            leitura. Nenhum byte sai do seu computador, exceto o envio opcional de volumes e fichas à API WeLib.
           </p>
         </div>
       </div>
@@ -195,6 +207,11 @@ export default function App() {
   const [deleting, setDeleting] = useState<Book | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [welibConfig, setWeLibConfig] = useState<WeLibConfig>(loadWeLibConfig);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<WeLibResult | null>(null);
+  const [syncingAll, setSyncingAll] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -323,19 +340,120 @@ export default function App() {
     [updateBook, notify]
   );
 
+  /* ---------------- integração WeLib ---------------- */
+
+  const applyWeLibConfig = useCallback(
+    (cfg: WeLibConfig) => {
+      saveWeLibConfig(cfg);
+      setWeLibConfig(cfg);
+      setTestResult(null);
+      setSettingsOpen(false);
+      notify("ok", cfg.demo ? "WeLib em modo demonstração — nenhum dado sai do navegador." : "Conexão WeLib salva.");
+    },
+    [notify]
+  );
+
+  const runWeLibTest = useCallback(async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const r = await testWeLib(welibConfig);
+      setTestResult(r);
+      notify(r.ok ? "ok" : "err", r.ok ? "WeLib respondeu ao teste de conexão." : r.message);
+    } finally {
+      setTesting(false);
+    }
+  }, [welibConfig, notify]);
+
+  const syncBook = useCallback(
+    async (b: Book) => {
+      if (!isWeLibReady(welibConfig)) {
+        setSettingsOpen(true);
+        notify("info", "Configure a conexão WeLib antes de sincronizar.");
+        return;
+      }
+      const uploading: Book = { ...b, sync: { state: "enviando" } };
+      setBooks((prev) => prev.map((x) => (x.id === b.id ? uploading : x)));
+      try {
+        const file = await getFile(b.id);
+        if (!file) throw new Error("PDF não encontrado no armazenamento local");
+        const r = await uploadToWeLib(welibConfig, b, file, b.fileName);
+        const done: Book = { ...b, sync: { state: "sincronizado", remoteId: r.remoteId, syncedAt: Date.now() } };
+        setBooks((prev) => prev.map((x) => (x.id === b.id ? done : x)));
+        putBook(done).catch(() => {});
+        notify("ok", `"${b.title}" enviado ao WeLib (${r.remoteId}).`);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Falha no envio";
+        const erro: Book = { ...b, sync: { state: "erro", error: msg } };
+        setBooks((prev) => prev.map((x) => (x.id === b.id ? erro : x)));
+        putBook(erro).catch(() => {});
+        notify("err", `WeLib: ${msg}`);
+      }
+    },
+    [welibConfig, notify]
+  );
+
+  const syncAll = useCallback(async () => {
+    if (!isWeLibReady(welibConfig)) {
+      setSettingsOpen(true);
+      return;
+    }
+    const targets = books.filter((b) => {
+      const s = syncState(b);
+      return s !== "sincronizado" && s !== "enviando";
+    });
+    if (!targets.length) return;
+    setSyncingAll(true);
+    let ok = 0;
+    let fail = 0;
+    for (const b of targets) {
+      const uploading: Book = { ...b, sync: { state: "enviando" } };
+      setBooks((prev) => prev.map((x) => (x.id === b.id ? uploading : x)));
+      try {
+        const file = await getFile(b.id);
+        if (!file) throw new Error("PDF não encontrado no armazenamento local");
+        const r = await uploadToWeLib(welibConfig, b, file, b.fileName);
+        const done: Book = { ...b, sync: { state: "sincronizado", remoteId: r.remoteId, syncedAt: Date.now() } };
+        setBooks((prev) => prev.map((x) => (x.id === b.id ? done : x)));
+        putBook(done).catch(() => {});
+        ok++;
+      } catch (e) {
+        const erro: Book = {
+          ...b,
+          sync: { state: "erro", error: e instanceof Error ? e.message : "Falha no envio" },
+        };
+        setBooks((prev) => prev.map((x) => (x.id === b.id ? erro : x)));
+        putBook(erro).catch(() => {});
+        fail++;
+      }
+    }
+    setSyncingAll(false);
+    notify(
+      fail === 0 ? "ok" : "err",
+      fail === 0 ? `WeLib: ${ok} volume(s) sincronizados.` : `WeLib: ${ok} enviado(s), ${fail} com falha.`
+    );
+  }, [books, welibConfig, notify]);
+
   const confirmDelete = useCallback(async () => {
     if (!deleting) return;
     const b = deleting;
     setDeleting(null);
+    const remoteId = b.sync?.remoteId;
     try {
       await deleteBook(b.id);
       setBooks((prev) => prev.filter((x) => x.id !== b.id));
       if (readingId === b.id) setReadingId(null);
-      notify("ok", `"${b.title}" foi removido da estante.`);
+      if (remoteId && isWeLibReady(welibConfig)) {
+        removeFromWeLib(welibConfig, remoteId)
+          .then(() => notify("ok", `"${b.title}" removido da estante e do WeLib.`))
+          .catch(() => notify("info", `"${b.title}" removido da estante — a cópia no WeLib foi mantida.`));
+      } else {
+        notify("ok", `"${b.title}" foi removido da estante.`);
+      }
     } catch {
       notify("err", "Falha ao remover o volume do armazenamento local.");
     }
-  }, [deleting, readingId, notify]);
+  }, [deleting, readingId, notify, welibConfig]);
 
   const onCatalogDone = useCallback(
     (created: Book[]) => {
@@ -348,7 +466,7 @@ export default function App() {
 
   const addSample = useCallback(() => {
     setCatalogFiles([domCasmurroSample()]);
-    notify("info", "PDF de exemplo gerado — veja o Open Library reconhecendo a obra.");
+    notify("info", "PDF de exemplo gerado — veja a API WeLib reconhecendo a obra.");
   }, [notify]);
 
   const counts = useMemo(
@@ -358,6 +476,8 @@ export default function App() {
       lendo: books.filter(isReading).length,
       lidos: books.filter(isRead).length,
       novos: books.filter((b) => b.progressPage === 0).length,
+      synced: books.filter((b) => syncState(b) === "sincronizado").length,
+      pendentes: books.filter((b) => syncState(b) !== "sincronizado").length,
     }),
     [books]
   );
@@ -476,7 +596,7 @@ export default function App() {
             <div className="leading-none">
               <p className="font-display text-[22px] font-black italic tracking-tight text-paper">Estante</p>
               <p className="mt-0.5 hidden font-mono text-[9px] tracking-[0.22em] text-muted md:block">
-                BIBLIOTECA PESSOAL · PDF · OPEN LIBRARY
+                BIBLIOTECA PESSOAL · PDF · API WELIB
               </p>
             </div>
           </div>
@@ -486,6 +606,18 @@ export default function App() {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              title="Configurar a integração com a API WeLib"
+              className="hidden h-10 items-center gap-2 rounded-md border border-line bg-surface/60 px-3 font-mono text-[11px] text-paper2 transition-colors hover:border-brass/50 hover:text-brass2 md:inline-flex"
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  welibConfig.demo ? "animate-pulse bg-brass" : isWeLibReady(welibConfig) ? "bg-moss" : "bg-line2"
+                }`}
+              />
+              WeLib · {welibConfig.demo ? "demo" : isWeLibReady(welibConfig) ? "on" : "off"}
+            </button>
             <button
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex h-10 items-center gap-2 rounded-md bg-brass px-3.5 text-sm font-bold text-night transition-all hover:bg-brass2 active:scale-95 sm:px-4"
@@ -520,8 +652,9 @@ export default function App() {
           <EmptyState onUpload={() => fileInputRef.current?.click()} onSample={addSample} />
         ) : (
           <>
-            {/* ficha do acervo */}
-            <section className="animate-fadeUp mt-6 overflow-hidden rounded-lg border border-line bg-surface/70">
+            {/* ficha do acervo + integração WeLib */}
+            <div className="mt-6 grid animate-fadeUp items-start gap-4 lg:grid-cols-[1fr_330px]">
+            <section className="overflow-hidden rounded-lg border border-line bg-surface/70">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-line px-5 py-2.5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-brass">Ficha do acervo</p>
                 <p className="font-mono text-[10px] text-muted">
@@ -542,6 +675,20 @@ export default function App() {
                 </div>
               </div>
             </section>
+
+            <WeLibPanel
+              config={welibConfig}
+              total={counts.todos}
+              synced={counts.synced}
+              pending={counts.pendentes}
+              testing={testing}
+              testResult={testResult}
+              syncingAll={syncingAll}
+              onTest={() => void runWeLibTest()}
+              onSettings={() => setSettingsOpen(true)}
+              onSyncAll={() => void syncAll()}
+            />
+            </div>
 
             {/* barra de filtros */}
             <section className="mt-7 flex flex-wrap items-center gap-3">
@@ -637,6 +784,7 @@ export default function App() {
                     onToggleFav={toggleFav}
                     onEdit={setEditing}
                     onAskDelete={setDeleting}
+                    onSync={(bk) => void syncBook(bk)}
                   />
                 ))}
               </section>
@@ -651,6 +799,7 @@ export default function App() {
                     onToggleFav={toggleFav}
                     onEdit={setEditing}
                     onAskDelete={setDeleting}
+                    onSync={(bk) => void syncBook(bk)}
                   />
                 ))}
               </section>
@@ -668,8 +817,8 @@ export default function App() {
           </p>
           <p className="flex flex-wrap items-center gap-x-2">
             <span>
-              capas &amp; metadados: <span className="text-brass2">Open Library</span> · leitor: pdf.js · tudo salvo
-              neste navegador
+              catálogo &amp; sincronização: <span className="text-brass2">API WeLib</span> · leitor: pdf.js · tudo
+              salvo neste navegador
             </span>
             <span className="text-line2">·</span>
             <a
@@ -699,6 +848,7 @@ export default function App() {
       {catalogFiles && (
         <CatalogModal
           files={catalogFiles}
+          welibConfig={welibConfig}
           notify={notify}
           onDone={onCatalogDone}
           onCancel={() => setCatalogFiles(null)}
@@ -738,6 +888,14 @@ export default function App() {
           confirmLabel="Remover volume"
           onConfirm={() => void confirmDelete()}
           onCancel={() => setDeleting(null)}
+        />
+      )}
+
+      {settingsOpen && (
+        <WeLibSettingsModal
+          config={welibConfig}
+          onSave={applyWeLibConfig}
+          onClose={() => setSettingsOpen(false)}
         />
       )}
 

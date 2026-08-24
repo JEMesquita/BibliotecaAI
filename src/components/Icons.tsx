@@ -168,3 +168,58 @@ export const IconPlus = (p: IconProps) => (
     <path d="M12 5v14M5 12h14" />
   </svg>
 );
+
+const CLOUD_PATH = "M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z";
+
+export const IconCloud = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d={CLOUD_PATH} />
+  </svg>
+);
+
+export const IconCloudCheck = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d={CLOUD_PATH} />
+    <path d="m9 13.4 2.1 2.1 3.9-4.2" />
+  </svg>
+);
+
+export const IconCloudOff = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M6.34 6.34A7 7 0 0 0 9 19h8.5" />
+    <path d="M9.7 5.2A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 3.97 6.36" />
+    <path d="M3 3l18 18" />
+  </svg>
+);
+
+export const IconGear = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 7.5h9M17.5 7.5H20M4 16.5h2.5M11 16.5H20" />
+    <circle cx="15" cy="7.5" r="2.2" />
+    <circle cx="8.5" cy="16.5" r="2.2" />
+  </svg>
+);
+
+export const IconSync = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M8 16H3v5" />
+  </svg>
+);
+
+export const IconServer = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3" y="4" width="18" height="7" rx="1.5" />
+    <rect x="3" y="13" width="18" height="7" rx="1.5" />
+    <path d="M7 7.5v.01M7 16.5v.01M11 7.5h6M11 16.5h6" />
+  </svg>
+);
+
+export const IconKey = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="8" cy="15" r="4.5" />
+    <path d="m11.2 11.8 8.3-8.3M17 6l2.5 2.5M14.5 8.5 17 11" />
+  </svg>
+);
