@@ -666,9 +666,18 @@ export default function App() {
             Estante · biblioteca pessoal — {books.length} {books.length === 1 ? "volume" : "volumes"},{" "}
             {formatBytes(totals.bytes)}
           </p>
-          <p>
-            capas &amp; metadados: <span className="text-brass2">Open Library</span> · leitor: pdf.js · tudo salvo neste
-            navegador
+          <p className="flex flex-wrap items-center gap-x-2">
+            <span>
+              capas &amp; metadados: <span className="text-brass2">Open Library</span> · leitor: pdf.js · tudo salvo
+              neste navegador
+            </span>
+            <span className="text-line2">·</span>
+            <a
+              href="./mockup.html"
+              className="rounded border border-line px-2 py-0.5 transition-colors hover:border-brass/60 hover:text-brass2"
+            >
+              mockup de apresentação ↗
+            </a>
           </p>
         </div>
       </footer>
