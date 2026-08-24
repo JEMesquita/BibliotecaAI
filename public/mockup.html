@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Estante · Mockup de apresentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,600;1,9..144,900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --night: #0c110d;
+    --deep: #0a0e0b;
+    --surface: #141c15;
+    --raise: #1b251c;
+    --line: #2a382c;
+    --line2: #3d5040;
+    --paper: #ede6d4;
+    --paper2: #c4bca7;
+    --muted: #8ca08c;
+    --brass: #d9a441;
+    --brass2: #edc36b;
+    --moss: #7fb069;
+    --ember: #e06c5a;
+    --page: #efe7d3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--paper);
+    background:
+      radial-gradient(1100px 520px at 50% -180px, rgba(217,164,65,.09), transparent 65%),
+      radial-gradient(900px 700px at 110% 8%, rgba(63,92,66,.14), transparent 60%),
+      radial-gradient(800px 700px at -10% 90%, rgba(217,164,65,.05), transparent 55%),
+      var(--night);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  ::selection { background: rgba(217,164,65,.35); color: #fff8e8; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  .mono { font-family: "IBM Plex Mono", monospace; }
+  .disp { font-family: "Fraunces", Georgia, serif; }
+
+  /* poeira dourada */
+  .dust { position: fixed; border-radius: 9999px; pointer-events: none; z-index: 0;
+    background: radial-gradient(circle, rgba(237,195,107,.9), rgba(237,195,107,0));
+    animation: float linear infinite; }
+  @keyframes float {
+    0% { transform: translateY(20px); opacity: 0; }
+    12% { opacity: .5; } 85% { opacity: .25; }
+    100% { transform: translateY(-60vh) translateX(26px); opacity: 0; }
+  }
+
+  /* cabeçalho ficha catalográfica */
+  .topline { display: flex; justify-content: space-between; align-items: center; padding: 22px 0 16px;
+    border-bottom: 1px solid var(--line); }
+  .topline .tag { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--brass); }
+  .topline .ver { font-size: 11px; color: var(--muted); }
+
+  .masthead { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; padding: 52px 0 26px; }
+  .kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+  .kicker b { color: var(--brass2); font-weight: 500; }
+  h1 { font-family: "Fraunces", serif; font-weight: 900; font-style: italic;
+    font-size: clamp(56px, 9vw, 118px); line-height: .92; letter-spacing: -.02em; margin-top: 14px; }
+  h1 .amp { color: var(--brass); }
+  .lede { max-width: 560px; margin-top: 20px; color: var(--paper2); font-size: 16px; line-height: 1.65; }
+  .stamp { justify-self: end; transform: rotate(7deg); border: 3px double var(--brass);
+    color: var(--brass2); padding: 12px 20px; text-align: center; border-radius: 6px;
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .3em; text-transform: uppercase;
+    opacity: .9; animation: stampIn .5s cubic-bezier(.2,1.4,.4,1) .3s both; margin-bottom: 14px; }
+  .stamp small { display: block; font-size: 9px; letter-spacing: .22em; color: var(--muted); margin-top: 5px; }
+  @keyframes stampIn { from { opacity: 0; transform: rotate(16deg) scale(1.6); } to { opacity: .9; transform: rotate(7deg) scale(1); } }
+
+  .specrow { display: flex; flex-wrap: wrap; gap: 0; border: 1px dashed var(--line2); border-radius: 8px;
+    overflow: hidden; margin: 14px 0 60px; }
+  .specrow > div { flex: 1 1 150px; padding: 12px 18px; border-right: 1px dashed var(--line); }
+  .specrow > div:last-child { border-right: 0; }
+  .specrow .k { font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted); }
+  .specrow .v { font-size: 14px; font-weight: 600; margin-top: 4px; }
+  .specrow .v em { color: var(--brass2); font-style: normal; }
+
+  /* seções de tela */
+  .screen-sec { margin-bottom: 84px; }
+  .sec-head { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; margin-bottom: 26px; }
+  .sec-num { font-family: "Fraunces", serif; font-weight: 900; font-style: italic; font-size: 64px; line-height: .8;
+    color: transparent; -webkit-text-stroke: 1.5px var(--brass); }
+  .sec-head h2 { font-family: "Fraunces", serif; font-weight: 700; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.05; }
+  .sec-head p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin-top: 8px; max-width: 640px; }
+  .points { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .points span { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--paper2);
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; background: var(--surface); }
+  .points span::before { content: "✳ "; color: var(--brass); }
+
+  /* moldura de navegador */
+  .frame { border: 1px solid var(--line2); border-radius: 12px; overflow: hidden; background: var(--deep);
+    box-shadow: 0 44px 90px -30px rgba(0,0,0,.85), 0 0 0 6px rgba(255,255,255,.02);
+    transition: transform .45s cubic-bezier(.2,.7,.3,1), box-shadow .45s ease; }
+  .frame:hover { transform: translateY(-8px) rotate(0deg) !important;
+    box-shadow: 0 60px 110px -30px rgba(0,0,0,.9), 0 0 70px -18px rgba(217,164,65,.22); }
+  .tilt-l { transform: rotate(-.5deg); }
+  .tilt-r { transform: rotate(.55deg); }
+  .chrome { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--surface);
+    border-bottom: 1px solid var(--line); }
+  .chrome i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .chrome .r { background: #e06c5a; } .chrome .y { background: #d9a441; } .chrome .g { background: #7fb069; }
+  .chrome .url { margin-left: 8px; flex: 1; max-width: 430px; background: var(--deep); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 16px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chrome .url b { color: var(--brass2); font-weight: 500; }
+  .canvas { padding: 22px; }
+
+  /* ===== réplica 1: estante ===== */
+  .appbar { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .mark { display: flex; align-items: center; gap: 10px; }
+  .mark .glyph { width: 34px; height: 34px; border-radius: 7px; background: var(--raise); border: 1px solid var(--line2);
+    display: grid; place-items: center; }
+  .mark .glyph svg { width: 18px; height: 18px; }
+  .mark .nm { font-family: "Fraunces", serif; font-weight: 900; font-style: italic; font-size: 24px; }
+  .mark .nm span { color: var(--brass); }
+  .search { flex: 1; max-width: 300px; margin-left: auto; display: flex; align-items: center; gap: 8px;
+    background: var(--night); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; color: var(--muted);
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; }
+  .btn-brass { background: var(--brass); color: var(--night); font-weight: 700; font-size: 13px; border-radius: 8px;
+    padding: 9px 16px; white-space: nowrap; }
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); border-radius: 8px;
+    margin: 16px 0; background: var(--surface); }
+  .stats > div { padding: 12px 16px; border-right: 1px dashed var(--line); }
+  .stats > div:last-child { border-right: 0; }
+  .stats .k { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted); }
+  .stats .v { font-family: "Fraunces", serif; font-weight: 900; font-size: 26px; margin-top: 3px; }
+  .chips { display: flex; gap: 8px; margin-bottom: 22px; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; font-size: 11.5px; font-weight: 600;
+    color: var(--paper2); background: var(--surface); }
+  .chip.on { background: var(--brass); color: var(--night); border-color: var(--brass); }
+  .chip small { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; opacity: .75; margin-left: 4px; }
+
+  .shelfgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  .vol {}
+  .cov { position: relative; aspect-ratio: 2/3; border-radius: 4px; overflow: hidden;
+    box-shadow: 0 12px 26px -12px rgba(0,0,0,.85); transition: transform .35s cubic-bezier(.2,.7,.3,1); }
+  .vol:hover .cov { transform: translateY(-7px); }
+  .cov .inner { position: absolute; inset: 8px; border: 1.5px solid rgba(237,195,107,.8); border-radius: 2px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px; }
+  .cov .inner::after { content: ""; position: absolute; inset: 4px; border: 1px solid rgba(237,195,107,.35); }
+  .cov .bt { font-family: "Fraunces", serif; font-weight: 700; font-size: 12.5px; line-height: 1.2; color: #f3ead6; }
+  .cov .ba { font-size: 7.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(237,195,107,.95);
+    margin-top: 7px; font-weight: 600; }
+  .cov .spine { position: absolute; inset: 0 auto 0 0; width: 9%;
+    background: linear-gradient(90deg, rgba(0,0,0,.4), transparent); }
+  .cov .spine::after { content: ""; position: absolute; left: 9%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.1); left: 100%; }
+  .cov .star { position: absolute; top: 7px; right: 7px; width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(10,14,11,.8); border: 1px solid rgba(217,164,65,.5); display: grid; place-items: center;
+    color: var(--brass); font-size: 9px; }
+  .cov .prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(0,0,0,.5); }
+  .cov .prog i { display: block; height: 100%; background: var(--brass); }
+  .cov .prog i.done { background: var(--moss); }
+  .cov .ol { position: absolute; left: 7px; bottom: 7px; font-family: "IBM Plex Mono", monospace; font-size: 6.5px;
+    letter-spacing: .1em; color: var(--night); background: var(--brass2); padding: 2px 6px; border-radius: 99px; font-weight: 500; }
+  .wood { margin-top: 6px; height: 7px; border-radius: 2px;
+    background: linear-gradient(180deg, #4a3820, #332614 55%, #211809);
+    box-shadow: 0 6px 10px -4px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08); }
+  .cap { margin-top: 8px; }
+  .cap .t { font-family: "Fraunces", serif; font-weight: 600; font-size: 12.5px; line-height: 1.25; }
+  .cap .a { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .cap .cn { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: rgba(140,160,140,.8); margin-top: 3px; }
+
+  /* ===== réplica 2: leitor ===== */
+  .duo { display: grid; grid-template-columns: 1.25fr 1fr; gap: 26px; align-items: start; }
+  .r-toolbar { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 16px; }
+  .r-toolbar .back { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--line); display: grid;
+    place-items: center; color: var(--paper2); font-size: 16px; }
+  .r-toolbar .tt { font-family: "Fraunces", serif; font-weight: 700; font-size: 15px; }
+  .r-toolbar .tt small { display: block; font-family: "Space Grotesk", sans-serif; font-weight: 400; font-size: 10.5px; color: var(--muted); }
+  .r-toolbar .pg { margin-left: auto; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--brass2); }
+  .r-toolbar .zoom { display: flex; gap: 6px; }
+  .r-toolbar .zoom b { width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 7px; display: grid;
+    place-items: center; font-size: 12px; color: var(--paper2); font-weight: 600; }
+  .r-body { margin-top: 14px; background: #0a0d0a; border: 1px solid var(--line); border-radius: 10px; padding: 22px;
+    display: grid; place-items: center; }
+  .page { width: min(300px, 100%); aspect-ratio: 595/842; background: var(--page); border-radius: 3px; position: relative;
+    box-shadow: 0 24px 50px -18px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.4); padding: 26px 24px;
+    background-image: linear-gradient(105deg, rgba(0,0,0,.10), transparent 12%); }
+  .page .ph { font-family: "Fraunces", serif; font-weight: 900; font-size: 15px; color: #26221a; }
+  .page .pa { font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: #7a6f57; margin: 3px 0 8px; }
+  .page .rule { height: 1.5px; background: #c9a24a; margin-bottom: 12px; width: 70%; }
+  .page .ln { height: 4px; border-radius: 2px; background: #cfc6ae; margin-bottom: 6px; }
+  .page .dc { float: left; font-family: "Fraunces", serif; font-weight: 900; font-size: 30px; line-height: .9;
+    color: #26221a; margin: 1px 6px 0 0; }
+  .page .pn { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center;
+    font-family: "IBM Plex Mono", monospace; font-size: 8px; color: #8a7f64; }
+  .r-slider { margin-top: 14px; display: flex; align-items: center; gap: 12px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; }
+  .r-slider .tr { flex: 1; height: 4px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--brass) 6%, var(--line) 6%); position: relative; }
+  .r-slider .tr i { position: absolute; left: 6%; top: 50%; transform: translate(-50%,-50%); width: 15px; height: 15px;
+    border-radius: 50%; background: var(--brass2); border: 3px solid var(--deep);
+    box-shadow: 0 0 0 1px rgba(217,164,65,.6); }
+  .r-slider .lb { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+
+  /* ===== réplica 3: catalogação ===== */
+  .cat { display: grid; grid-template-columns: 1fr 1.2fr; gap: 18px; }
+  .drop { border: 2px dashed var(--line2); border-radius: 10px; display: flex; flex-direction: column; gap: 10px;
+    align-items: center; justify-content: center; text-align: center; padding: 26px 18px; background: rgba(10,14,11,.5); }
+  .drop .ic { width: 46px; height: 46px; border-radius: 10px; border: 1px solid var(--line2); display: grid;
+    place-items: center; color: var(--brass); }
+  .drop .h { font-family: "Fraunces", serif; font-weight: 700; font-style: italic; font-size: 19px; }
+  .drop .s { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--muted); line-height: 1.7; }
+  .filechip { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--night); padding: 10px 12px; margin-top: 4px; }
+  .filechip .pdf { font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 500; color: var(--ember);
+    border: 1px solid rgba(224,108,90,.5); border-radius: 4px; padding: 3px 6px; }
+  .filechip .fn { font-size: 12px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .filechip .fs { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--muted); }
+  .filechip .ok { color: var(--moss); font-size: 13px; }
+  .api-chip { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass2); background: rgba(217,164,65,.08);
+    border: 1px solid rgba(217,164,65,.35); border-radius: 6px; padding: 8px 12px; line-height: 1.6; margin-bottom: 12px; }
+  .api-chip .mth { color: var(--moss); }
+  .res-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .res-head .t { font-size: 12.5px; font-weight: 700; }
+  .res-head .n { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--muted); }
+  .match { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 9px;
+    padding: 10px 12px; margin-bottom: 8px; background: var(--night); transition: border-color .25s, transform .25s; }
+  .match:hover { transform: translateX(4px); }
+  .match.sel { border-color: var(--brass); background: rgba(217,164,65,.07); box-shadow: 0 0 0 1px rgba(217,164,65,.25); }
+  .match .mc { width: 34px; height: 50px; border-radius: 3px; flex-shrink: 0; box-shadow: 0 6px 12px -5px rgba(0,0,0,.7); }
+  .match .mi { flex: 1; min-width: 0; }
+  .match .mt { font-family: "Fraunces", serif; font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .match .ma { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .match .badge { font-family: "IBM Plex Mono", monospace; font-size: 8px; letter-spacing: .08em; color: var(--brass2);
+    border: 1px solid rgba(217,164,65,.45); border-radius: 99px; padding: 2px 7px; margin-top: 4px; display: inline-block; }
+  .match .rd { width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--line2); flex-shrink: 0; position: relative; }
+  .match.sel .rd { border-color: var(--brass); }
+  .match.sel .rd::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--brass); }
+  .cat-foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+  .cat-foot .ghost { border: 1px solid var(--line); border-radius: 7px; padding: 8px 14px; font-size: 12px; color: var(--paper2); }
+  .cat-foot .go { background: var(--brass); color: var(--night); font-weight: 700; font-size: 12px; border-radius: 7px; padding: 8px 16px; }
+
+  /* tokens */
+  .tokens { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; margin-bottom: 84px; }
+  .tokens .hd { padding: 14px 22px; border-bottom: 1px dashed var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .tokens .hd .t { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--brass); }
+  .tokens .grid { display: grid; grid-template-columns: 1.1fr 1fr 1.2fr; }
+  .tokens .cell { padding: 22px; border-right: 1px dashed var(--line); }
+  .tokens .cell:last-child { border-right: 0; }
+  .tokens .ck { font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .sw { text-align: center; }
+  .sw i { display: block; height: 44px; border-radius: 7px; border: 1px solid rgba(255,255,255,.08); }
+  .sw span { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); display: block; margin-top: 6px; }
+  .type-spec .row { display: flex; align-items: baseline; gap: 14px; padding: 9px 0; border-bottom: 1px dotted var(--line); }
+  .type-spec .row:last-child { border-bottom: 0; }
+  .type-spec .nm { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass2); width: 110px; flex-shrink: 0; }
+  .type-spec .f-disp { font-family: "Fraunces", serif; font-weight: 900; font-style: italic; font-size: 24px; }
+  .type-spec .f-body { font-size: 15px; font-weight: 500; }
+  .type-spec .f-mono { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--paper2); }
+  .endpoints { display: flex; flex-direction: column; gap: 8px; }
+  .endpoints code { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; background: var(--deep); border: 1px solid var(--line);
+    border-radius: 6px; padding: 9px 12px; color: var(--paper2); line-height: 1.55; word-break: break-all; }
+  .endpoints code b { color: var(--moss); font-weight: 500; }
+  .endpoints code em { color: var(--brass2); font-style: normal; }
+
+  /* rodapé */
+  .foot { border-top: 1px solid var(--line); padding: 40px 0 60px; display: flex; flex-wrap: wrap; gap: 20px;
+    align-items: center; justify-content: space-between; }
+  .foot .msg { font-family: "Fraunces", serif; font-style: italic; font-weight: 600; font-size: 22px; max-width: 480px; }
+  .foot .msg span { color: var(--brass); }
+  .foot a.live { display: inline-flex; align-items: center; gap: 10px; background: var(--brass); color: var(--night);
+    font-weight: 700; font-size: 14px; border-radius: 9px; padding: 14px 24px; text-decoration: none;
+    box-shadow: 0 14px 34px -10px rgba(217,164,65,.45); transition: transform .25s, background .25s; }
+  .foot a.live:hover { transform: translateY(-3px); background: var(--brass2); }
+
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 980px) {
+    .duo, .cat, .tokens .grid { grid-template-columns: 1fr; }
+    .tokens .cell { border-right: 0; border-bottom: 1px dashed var(--line); }
+    .tokens .cell:last-child { border-bottom: 0; }
+    .shelfgrid { grid-template-columns: repeat(3, 1fr); }
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .stats > div:nth-child(3n) { border-right: 0; }
+    .stats > div { border-bottom: 1px dashed var(--line); }
+    .stats > div:nth-child(n+4) { border-bottom: 0; }
+    .masthead { grid-template-columns: 1fr; }
+    .stamp { justify-self: start; }
+  }
+  @media (max-width: 560px) {
+    .shelfgrid { grid-template-columns: repeat(2, 1fr); }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<span class="dust" style="left:8%;  top:70%; width:5px; height:5px; animation-duration:11s;"></span>
+<span class="dust" style="left:22%; top:85%; width:3px; height:3px; animation-duration:14s; animation-delay:2s;"></span>
+<span class="dust" style="left:47%; top:92%; width:4px; height:4px; animation-duration:12s; animation-delay:5s;"></span>
+<span class="dust" style="left:68%; top:80%; width:6px; height:6px; animation-duration:15s; animation-delay:1s;"></span>
+<span class="dust" style="left:86%; top:88%; width:3px; height:3px; animation-duration:10s; animation-delay:4s;"></span>
+<span class="dust" style="left:35%; top:60%; width:4px; height:4px; animation-duration:13s; animation-delay:7s;"></span>
+
+<div class="wrap">
+
+  <!-- topo -->
+  <div class="topline">
+    <span class="tag mono">Material de apresentação · interface</span>
+    <span class="ver mono">v1.0 · prévia estática</span>
+  </div>
+
+  <header class="masthead">
+    <div>
+      <p class="kicker mono">Biblioteca virtual <b>·</b> PDF <b>·</b> Open Library API</p>
+      <h1>Estante<span class="amp">.</span></h1>
+      <p class="lede">
+        Envie PDFs, receba capas e fichas catalográficas do <strong style="color:var(--brass2)">Open Library</strong>
+        e leia direto no navegador — com progresso salvo página a página e todo o acervo guardado no seu dispositivo.
+      </p>
+    </div>
+    <div class="stamp">Mockup<small>uso interno · 2026</small></div>
+  </header>
+
+  <div class="specrow reveal">
+    <div><p class="k">Plataforma</p><p class="v">Web app <em>(SPA)</em></p></div>
+    <div><p class="k">Integração</p><p class="v">Open Library <em>API</em></p></div>
+    <div><p class="k">Leitor</p><p class="v">pdf.js <em>canvas</em></p></div>
+    <div><p class="k">Armazenamento</p><p class="v">IndexedDB <em>local</em></p></div>
+    <div><p class="k">Cadastro</p><p class="v">Zero <em>login</em></p></div>
+  </div>
+
+  <!-- TELA 01 -->
+  <section class="screen-sec reveal">
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <div>
+        <h2>A estante principal</h2>
+        <p>
+          O acervo abre como uma estante de verdade: volumes com lombada, prateleira de madeira e código de chamada
+          no estilo Dewey. A ficha do acervo resume o essencial e os filtros acompanham o ritmo da leitura.
+        </p>
+        <div class="points">
+          <span>capas via Open Library</span>
+          <span>progresso salvo por página</span>
+          <span>drag &amp; drop de PDFs</span>
+          <span>vistas estante / lista</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame tilt-l">
+      <div class="chrome">
+        <i class="r"></i><i class="y"></i><i class="g"></i>
+        <div class="url">🔒 estante.app/<b>acervo</b> — 6 volumes</div>
+      </div>
+      <div class="canvas">
+        <div class="appbar">
+          <div class="mark">
+            <div class="glyph">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#d9a441" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <div class="nm">Estante<span>.</span></div>
+          </div>
+          <div class="search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            buscar no acervo…
+          </div>
+          <div class="btn-brass">＋ Enviar PDF</div>
+        </div>
+
+        <div class="stats">
+          <div><p class="k">Volumes</p><p class="v">6</p></div>
+          <div><p class="k">Páginas</p><p class="v">1.842</p></div>
+          <div><p class="k">Lidos</p><p class="v">2</p></div>
+          <div><p class="k">Em leitura</p><p class="v">3</p></div>
+          <div><p class="k">Espaço</p><p class="v" style="font-size:22px;">24,6 MB</p></div>
+        </div>
+
+        <div class="chips">
+          <span class="chip on">Todos <small>6</small></span>
+          <span class="chip">Lendo <small>3</small></span>
+          <span class="chip">Lidos <small>2</small></span>
+          <span class="chip">Novos <small>1</small></span>
+          <span class="chip">★ Favoritos <small>2</small></span>
+        </div>
+
+        <div class="shelfgrid">
+          <div class="vol">
+            <div class="cov" style="background:linear-gradient(165deg,#2b4a3c,#131f19);">
+              <div class="spine"></div>
+              <div class="inner"><div class="bt">Dom Casmurro</div><div class="ba">Machado de Assis</div></div>
+              <div class="star">★</div>
+              <div class="prog"><i style="width:62%"></i></div>
+              <div class="ol">OPEN LIBRARY</div>
+            </div>
+            <div class="wood"></div>
+            <div class="cap"><div class="t">Dom Casmurro</div><div class="a">Machado de Assis</div><div class="cn">MAC 412 · 214 p. · 62%</div></div>
+          </div>
+          <div class="vol">
+            <div class="cov" style="background:linear-gradient(165deg,#52302a,#261411);">
+              <div class="spine"></div>
+              <div class="inner"><div class="bt">Grande Sertão: Veredas</div><div class="ba">Guimarães Rosa</div></div>
+              <div class="prog"><i style="width:34%"></i></div>
+            </div>
+            <div class="wood"></div>
+            <div class="cap"><div class="t">Grande Sertão: Veredas</div><div class="a">Guimarães Rosa</div><div class="cn">ROS 287 · 624 p. · 34%</div></div>
+          </div>
+          <div class="vol">
+            <div class="cov" style="background:linear-gradient(165deg,#25384f,#101823);">
+              <div class="spine"></div>
+              <div class="inner"><div class="bt">Memórias Póstumas de Brás Cubas</div><div class="ba">Machado de Assis</div></div>
+              <div class="prog"><i style="width:81%"></i></div>
+            </div>
+            <div class="wood"></div>
+            <div class="cap"><div class="t">Memórias Póstumas de Brás Cubas</div><div class="a">Machado de Assis</div><div class="cn">MAC 156 · 320 p. · 81%</div></div>
+          </div>
+          <div class="vol">
+            <div class="cov" style="background:linear-gradient(165deg,#54401e,#261d0d);">
+              <div class="spine"></div>
+              <div class="inner"><div class="bt">Vidas Secas</div><div class="ba">Graciliano Ramos</div></div>
+              <div class="prog"><i class="done" style="width:100%"></i></div>
+            </div>
+            <div class="wood"></div>
+            <div class="cap"><div class="t">Vidas Secas</div><div class="a">Graciliano Ramos</div><div class="cn">RAM 733 · 176 p. · lido ✓</div></div>
+          </div>
+          <div class="vol">
+            <div class="cov" style="background:linear-gradient(165deg,#41304b,#1d1522);">
+              <div class="spine"></div>
+              <div class="inner"><div class="bt">O Alienista</div><div class="ba">Machado de Assis</div></div>
+              <div class="star">★</div>
+              <div class="prog"><i class="done" style="width:100%"></i></div>
+            </div>
+            <div class="wood"></div>
+            <div class="cap"><div class="t">O Alienista</div><div class="a">Machado de Assis</div><div class="cn">MAC 208 · 96 p. · lido ✓</div></div>
+          </div>
+          <div class="vol">
+            <div class="cov" style="background:linear-gradient(165deg,#204141,#0e1c1c);">
+              <div class="spine"></div>
+              <div class="inner"><div class="bt">A Hora da Estrela</div><div class="ba">Clarice Lispector</div></div>
+              <div class="ol">SEM CAPA · GERADA</div>
+            </div>
+            <div class="wood"></div>
+            <div class="cap"><div class="t">A Hora da Estrela</div><div class="a">Clarice Lispector</div><div class="cn">LIS 590 · 88 p. · novo</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA 02 + 03 -->
+  <div class="duo">
+    <section class="screen-sec reveal" style="margin-bottom:0;">
+      <div class="sec-head" style="grid-template-columns:auto 1fr;">
+        <div class="sec-num" style="font-size:48px;">02</div>
+        <div>
+          <h2 style="font-size:26px;">O leitor embutido</h2>
+          <p style="font-size:13px;">
+            Cada página renderizada em canvas pelo pdf.js. O progresso é salvo automaticamente
+            e a leitura retoma exatamente de onde parou.
+          </p>
+        </div>
+      </div>
+      <div class="frame tilt-r">
+        <div class="chrome">
+          <i class="r"></i><i class="y"></i><i class="g"></i>
+          <div class="url">estante.app/leitura/<b>dom-casmurro</b></div>
+        </div>
+        <div class="canvas" style="padding:16px;">
+          <div class="r-toolbar">
+            <div class="back">‹</div>
+            <div class="tt">Dom Casmurro<small>Machado de Assis · 1899</small></div>
+            <div class="pg">pág. 12 / 214</div>
+            <div class="zoom"><b>A−</b><b>A+</b></div>
+          </div>
+          <div class="r-body">
+            <div class="page">
+              <div class="ph">Dom Casmurro</div>
+              <div class="pa">Machado de Assis</div>
+              <div class="rule"></div>
+              <div class="dc">U</div>
+              <div class="ln" style="width:52%"></div>
+              <div class="ln" style="width:96%"></div>
+              <div class="ln" style="width:88%"></div>
+              <div class="ln" style="width:93%"></div>
+              <div class="ln" style="width:84%"></div>
+              <div class="ln" style="width:90%"></div>
+              <div class="ln" style="width:70%"></div>
+              <div class="ln" style="width:100%; margin-top:12px;"></div>
+              <div class="ln" style="width:92%"></div>
+              <div class="ln" style="width:86%"></div>
+              <div class="ln" style="width:95%"></div>
+              <div class="ln" style="width:60%"></div>
+              <div class="pn">— 12 —</div>
+            </div>
+          </div>
+          <div class="r-slider">
+            <span class="lb">‹</span>
+            <div class="tr"><i></i></div>
+            <span class="lb">›</span>
+            <span class="lb" style="color:var(--brass2);">12 / 214</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen-sec reveal" style="margin-bottom:0;">
+      <div class="sec-head" style="grid-template-columns:auto 1fr;">
+        <div class="sec-num" style="font-size:48px;">03</div>
+        <div>
+          <h2 style="font-size:26px;">Catalogação Open Library</h2>
+          <p style="font-size:13px;">
+            Ao enviar um PDF, a estante consulta o Open Library pelo título do arquivo,
+            oferece capas e metadados reais e deixa você escolher a correspondência certa.
+          </p>
+        </div>
+      </div>
+      <div class="frame tilt-l">
+        <div class="chrome">
+          <i class="r"></i><i class="y"></i><i class="g"></i>
+          <div class="url">estante.app/<b>novo-volume</b></div>
+        </div>
+        <div class="canvas" style="padding:16px;">
+          <div class="cat">
+            <div>
+              <div class="drop">
+                <div class="ic">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg>
+                </div>
+                <div class="h">Arraste seus PDFs</div>
+                <div class="s">ou clique para escolher<br/>vários arquivos de uma vez</div>
+              </div>
+              <div class="filechip">
+                <span class="pdf">PDF</span>
+                <span class="fn">Dom_Casmurro_(1899).pdf</span>
+                <span class="fs">1,8 MB</span>
+                <span class="ok">✓</span>
+              </div>
+              <div class="filechip">
+                <span class="pdf">PDF</span>
+                <span class="fn">vidas-secas-graciliano.pdf</span>
+                <span class="fs">940 KB</span>
+                <span class="ok">✓</span>
+              </div>
+            </div>
+            <div>
+              <div class="api-chip">
+                <span class="mth">GET</span> openlibrary.org/search.json<br/>
+                ?title=<em>dom casmurro</em>&amp;fields=cover_i,author_name → <span class="mth">200</span> · 5 resultados
+              </div>
+              <div class="res-head">
+                <span class="t">Correspondências no Open Library</span>
+                <span class="n">3 de 5</span>
+              </div>
+              <div class="match sel">
+                <div class="mc" style="background:linear-gradient(165deg,#7a4a2e,#3a2113);"></div>
+                <div class="mi">
+                  <div class="mt">Dom Casmurro</div>
+                  <div class="ma">Machado de Assis · 1899 · Garnier</div>
+                  <span class="badge">CAPA DISPONÍVEL ✓</span>
+                </div>
+                <div class="rd"></div>
+              </div>
+              <div class="match">
+                <div class="mc" style="background:linear-gradient(165deg,#25384f,#101823);"></div>
+                <div class="mi">
+                  <div class="mt">Dom Casmurro (edição comentada)</div>
+                  <div class="ma">Machado de Assis · 2008 · Penguin</div>
+                </div>
+                <div class="rd"></div>
+              </div>
+              <div class="match">
+                <div class="mc" style="background:linear-gradient(165deg,#2b4a3c,#131f19);"></div>
+                <div class="mi">
+                  <div class="mt">Dom Casmurro e os narradores</div>
+                  <div class="ma">H. Bloom (org.) · 1998</div>
+                </div>
+                <div class="rd"></div>
+              </div>
+              <div class="cat-foot">
+                <span class="ghost">Salvar sem capa</span>
+                <span class="go">Adicionar à estante →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div style="height:84px;"></div>
+
+  <!-- TOKENS -->
+  <section class="tokens reveal">
+    <div class="hd">
+      <span class="t">Sistema visual</span>
+      <span class="mono" style="font-size:10px;color:var(--muted);">sala de leitura · verde-noite &amp; latão</span>
+    </div>
+    <div class="grid">
+      <div class="cell">
+        <p class="ck">Paleta</p>
+        <div class="swatches">
+          <div class="sw"><i style="background:#0c110d;"></i><span>#0C110D</span></div>
+          <div class="sw"><i style="background:#141c15;"></i><span>#141C15</span></div>
+          <div class="sw"><i style="background:#2a382c;"></i><span>#2A382C</span></div>
+          <div class="sw"><i style="background:#d9a441;"></i><span>#D9A441</span></div>
+          <div class="sw"><i style="background:#edc36b;"></i><span>#EDC36B</span></div>
+          <div class="sw"><i style="background:#ede6d4;"></i><span>#EDE6D4</span></div>
+          <div class="sw"><i style="background:#7fb069;"></i><span>#7FB069</span></div>
+          <div class="sw"><i style="background:#e06c5a;"></i><span>#E06C5A</span></div>
+        </div>
+      </div>
+      <div class="cell">
+        <p class="ck">Tipografia</p>
+        <div class="type-spec">
+          <div class="row"><span class="nm">Fraunces</span><span class="f-disp">Aa Bb 1899</span></div>
+          <div class="row"><span class="nm">Space Grotesk</span><span class="f-body">Acervo · 24 volumes</span></div>
+          <div class="row"><span class="nm">IBM Plex Mono</span><span class="f-mono">MAC 412 · pág. 12/214</span></div>
+        </div>
+      </div>
+      <div class="cell">
+        <p class="ck">Integração · Open Library</p>
+        <div class="endpoints">
+          <code><b>GET</b> openlibrary.org/search.json<br/>?title=<em>{nome do arquivo}</em>&amp;fields=cover_i,author_name…</code>
+          <code><b>IMG</b> covers.openlibrary.org/b/id/<em>{cover_i}</em>-L.jpg</code>
+          <code><b>FALLBACK</b> capa gerada em canvas · <em>offline-first</em></code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- rodapé -->
+  <footer class="foot reveal">
+    <p class="msg">Isto é só a prévia — o acervo de verdade <span>está a um clique.</span></p>
+    <a class="live" href="./index.html">
+      Abrir a Estante
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+    </a>
+  </footer>
+
+  <p class="mono" style="text-align:center; font-size:10px; color:var(--muted); padding-bottom:40px;">
+    Estante · mockup de apresentação · réplicas estáticas das telas reais · dados fictícios
+  </p>
+</div>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+</script>
+</body>
+</html>
